@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e028b099aa5d14e399bc3d87df5b7737, type: 3}
+  m_Name: rod blueprint
+  m_EditorClassIdentifier: Obi::Obi.ObiRodBlueprint
+  m_Checksum: 0
+  m_Empty: 1
+  m_Edited: 0
+  m_ActiveParticleCount: 0
+  m_InitialActiveParticleCount: 0
+  _bounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  positions: []
+  restPositions: []
+  restNormals: []
+  orientations: []
+  restOrientations: []
+  velocities: []
+  angularVelocities: []
+  invMasses: []
+  invRotationalMasses: []
+  filters: 
+  principalRadii: []
+  colors: []
+  points: 
+  edges: 
+  triangles: 
+  distanceConstraintsData:
+    batches: []
+  bendConstraintsData:
+    batches: []
+  skinConstraintsData:
+    batches: []
+  tetherConstraintsData:
+    batches: []
+  stretchShearConstraintsData:
+    batches: []
+  bendTwistConstraintsData:
+    batches: []
+  shapeMatchingConstraintsData:
+    batches: []
+  aerodynamicConstraintsData:
+    batches: []
+  chainConstraintsData:
+    batches: []
+  volumeConstraintsData:
+    batches: []
+  groups: []
+  path:
+    m_Names: []
+    m_Points:
+      data: []
+    m_Normals:
+      data: []
+    m_Colors:
+      data: []
+    m_Thickness:
+      data: []
+    m_Masses:
+      data: []
+    m_RotationalMasses:
+      data: []
+    m_Filters:
+      data: 
+    m_Closed: 0
+    m_ArcLengthTable: []
+    m_TotalSplineLenght: 0
+    OnPathChanged:
+      m_PersistentCalls:
+        m_Calls: []
+    OnControlPointAdded:
+      m_PersistentCalls:
+        m_Calls: []
+    OnControlPointRemoved:
+      m_PersistentCalls:
+        m_Calls: []
+    OnControlPointRenamed:
+      m_PersistentCalls:
+        m_Calls: []
+  thickness: 0.1
+  resolution: 1
+  m_InterParticleDistance: 0
+  totalParticles: 0
+  m_RestLength: 0
+  deformableEdges: 
+  restLengths: []
+  keepInitialShape: 1
