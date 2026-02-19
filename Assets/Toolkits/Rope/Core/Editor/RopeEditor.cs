@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 
+using RopeToolkit;
 namespace RopeToolkit
+
 {
-    [CustomEditor(typeof(Rope)), CanEditMultipleObjects]
+    [CustomEditor(typeof(Rope), true)]
+    [CanEditMultipleObjects]
     public class RopeEditor : Editor
     {
         public override void OnInspectorGUI()
@@ -66,7 +69,7 @@ namespace RopeToolkit
                 }
                 else
                 {
-                    var fmh_69_65_638960311861581920 = Quaternion.identity; position = Handles.FreeMoveHandle(position, rope.radius * 4.0f, Vector3.one * 0.5f, Handles.SphereHandleCap);
+                    position = Handles.FreeMoveHandle(position, rope.radius * 4.0f, Vector3.one * 0.5f, Handles.SphereHandleCap);
                 }
                 if (EditorGUI.EndChangeCheck())
                 {
@@ -77,4 +80,9 @@ namespace RopeToolkit
             }
         }
     }
+
+    
 }
+
+// Editor für MyRope, falls MyRope keine Rope-Unterklasse ist
+

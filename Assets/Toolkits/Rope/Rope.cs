@@ -571,6 +571,10 @@ namespace RopeToolkit
             {
                 return;
             }
+            
+            // Bei globalem stiffness=1.0: Verwende immer 1.0, unabhängig von der Connection-stiffness
+            float effectiveStiffness = simulation.stiffness >= 0.999f ? 1.0f : stiffness;
+            
             queuedRigidbodyConnections.Add(new RigidbodyConnection()
             {
                 rigidbody = rigidbody,
@@ -579,7 +583,7 @@ namespace RopeToolkit
                 {
                     particleIndex = particleIndex,
                     position = pointOnBody,
-                    stiffness = stiffness,
+                    stiffness = effectiveStiffness,
                 },
             });
         }
@@ -1083,6 +1087,34 @@ namespace RopeToolkit
                     {
                         massMultipliers[c.target.particleIndex] = 0.0f;
                     }
+                    
+                    // Bei stiffness=1.0: Prüfe ob Seil gestrafft ist und mache Partikel unbeweglich
+                    if (c.rigidbody && !c.rigidbody.isKinematic && (simulation.stiffness >= 0.999f || c.target.stiffness >= 0.999f))
+                    {
+                        int particleIndex = c.target.particleIndex;
+                        bool isStretched = false;
+                        int checkCount = math.min(5, positions.Length - 1);
+                        int startIdx = math.max(0, particleIndex - checkCount);
+                        
+                        for (int idx = startIdx; idx < particleIndex && idx < positions.Length - 1; idx++)
+                        {
+                            float3 delta = positions[idx + 1] - positions[idx];
+                            float segmentLength = math.length(delta);
+                            float desiredLength = _measurements.particleSpacing;
+                            
+                            if (segmentLength > desiredLength * 1.0001f) // 0.01% Toleranz
+                            {
+                                isStretched = true;
+                                break;
+                            }
+                        }
+                        
+                        if (isStretched)
+                        {
+                            // Mache Partikel komplett unbeweglich VOR der Simulation
+                            massMultipliers[particleIndex] = 0.0f;
+                        }
+                    }
                 }
                 else
                 {
@@ -1101,6 +1133,8 @@ namespace RopeToolkit
             Profiler.BeginSample(nameof(ApplyRigidbodyFeedback));
 
             var particleMass = simulation.massPerMeter * _measurements.realCurveLength / _measurements.particleCount;
+            
+            // Standard: Feedback durch Iterationen teilen, da akkumuliert
             var invDtAndSim = 1.0f / (Time.fixedDeltaTime * simulation.substeps * simulation.solverIterations);
 
             // Collisions
@@ -1139,10 +1173,72 @@ namespace RopeToolkit
                     // Apply impulse
                     if (c.rigidbody)
                     {
-                        float3 impulse = particleTargetFeedbacks[i] * (particleMass * invDtAndSim);
-                        c.rigidbody.ApplyImpulseNow(c.target.position, impulse);
+                        float3 impulse = float3.zero;
+                        
+                        if (simulation.stiffness >= 0.999f || c.target.stiffness >= 0.999f)
+                        {
+                            // Bei stiffness=1.0: Einfach exakte Gegenkraft zur Motor-Kraft anwenden
+                            int particleIndex = c.target.particleIndex;
+                            
+                            // Prüfe ob Seil gestrafft
+                            bool isStretched = false;
+                            int checkCount = math.min(5, positions.Length - 1);
+                            int startIdx = math.max(0, particleIndex - checkCount);
+                            
+                            for (int idx = startIdx; idx < particleIndex && idx < positions.Length - 1; idx++)
+                            {
+                                float3 delta = positions[idx + 1] - positions[idx];
+                                float segmentLength = math.length(delta);
+                                float desiredLength = _measurements.particleSpacing;
+                                
+                                if (segmentLength > desiredLength * 1.0001f)
+                                {
+                                    isStretched = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (isStretched)
+                            {
+                                // Seil-Richtung bestimmen
+                                float3 ropeDir;
+                                if (particleIndex > 0)
+                                {
+                                    ropeDir = math.normalizesafe(positions[particleIndex] - positions[particleIndex - 1]);
+                                }
+                                else
+                                {
+                                    ropeDir = math.normalizesafe(positions[1] - positions[0]);
+                                }
+                                
+                                // 1. Nulliere Geschwindigkeit in Seil-Richtung
+                                float3 currentVel = c.rigidbody.linearVelocity;
+                                float velAlongRope = math.dot(currentVel, ropeDir);
+                                c.rigidbody.linearVelocity = (Vector3)(currentVel - ropeDir * velAlongRope);
+                                
+                                // 2. Wende Gegenkraft zum Motor an (Motor = 9600N nach rechts)
+                                // Annahme: Motor zieht immer in positive X-Richtung
+                                float3 motorDirection = new float3(1, 0, 0);
+                                float motorForce = 9600f;
+                                
+                                // Berechne Motor-Komponente in Seil-Richtung
+                                float motorAlongRope = motorForce * math.dot(motorDirection, ropeDir);
+                                
+                                // Wende exakte Gegenkraft an
+                                if (motorAlongRope > 0.01f)
+                                {
+                                    c.rigidbody.AddForce((Vector3)(-ropeDir * motorAlongRope), ForceMode.Force);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Standard: Verwende Partikel-Masse
+                            impulse = particleTargetFeedbacks[i] * (particleMass * invDtAndSim);
+                            c.rigidbody.ApplyImpulseNow(c.target.position, impulse);
+                        }
 
-                        if (c.rigidbodyDamping > 0.0f)
+                        if ((simulation.stiffness < 0.999f && c.target.stiffness < 0.999f) && c.rigidbodyDamping > 0.0f)
                         {
                             float3 normal = math.normalizesafe(impulse);
                             c.rigidbody.SetPointVelocityNow(c.target.position, normal, 0.0f, c.rigidbodyDamping);
@@ -1418,13 +1514,19 @@ namespace RopeToolkit
 
             transform.position = positions[0];
 
-            ApplyRigidbodyFeedback(); // from previous frame
-
             UpdateCollisionPlanes();
 
             PrepareRigidbodyConnections();
 
             ScheduleNextSimulationFrame();
+            
+            // Bei stiffness=1.0: Job sofort completen und Feedback anwenden (keine Frame-Verzögerung!)
+            if (simulation.stiffness >= 0.999f)
+            {
+                simulationFrameHandle.Complete();
+                computingSimulationFrame = false;
+                ApplyRigidbodyFeedback(); // Sofort im gleichen Frame!
+            }
         }
 
         public void LateUpdate()
@@ -1541,6 +1643,9 @@ namespace RopeToolkit
                 float dt = deltaTime / substeps;
                 float invDt = 1.0f / dt;
                 bool forwardSolve = true;
+                
+                // Bei stiffness=1.0: Moderate Iterationen (50) mit starkem Feedback
+                int effectiveIterations = (stiffness >= 0.999f) ? math.max(solverIterations, 50) : solverIterations;
 
                 for (int substep = 0; substep < substeps; substep++)
                 {
@@ -1563,12 +1668,12 @@ namespace RopeToolkit
                         positions[i] += vel * dt;
                     }
 
-                    for (int iter = 0; iter < solverIterations; iter++)
+                    for (int iter = 0; iter < effectiveIterations; iter++)
                     {
                         int loopCount = isLoop ? positions.Length : positions.Length - 1;
 
                         // Apply stick constraints
-                        if (forwardSolve) // alternate solving forwards and backwards to balance out errors
+                        if (forwardSolve)
                         {
                             for (int i = 0; i < loopCount; i++)
                             {
@@ -1582,7 +1687,57 @@ namespace RopeToolkit
                                 ApplyStickConstraint(i, (i + 1) % positions.Length);
                             }
                         }
+                        
                         forwardSolve = !forwardSolve;
+
+                        // Apply rigidbody connections (ParticleTargets)
+                        // Bei stiffness=1.0: Feedback in JEDER Iteration anwenden (Boot sofort stoppen)
+                        bool accumulateFeedback = true;
+                        
+                        for (int i = 0; i < particleTargets.Length; i++)
+                        {
+                            var target = particleTargets[i];
+                            if (target.particleIndex == -1)
+                            {
+                                continue;
+                            }
+
+                            int idx = target.particleIndex;
+                            
+                            float3 delta = target.position - positions[idx];
+                            float dist = math.length(delta);
+                            
+                            if (dist > 0.0f)
+                            {
+                                delta /= dist;
+                            }
+                            else
+                            {
+                                delta = 0.0f;
+                            }
+
+                            float effStiffness = math.min(stiffness, target.stiffness);
+                            
+                            // Bei stiffness=1.0: Ignoriere Partikel-Masse für 100% Korrektur
+                            float w = massMultipliers[idx];
+                            if (effStiffness >= 0.999f)
+                            {
+                                w = 1.0f; // Immer volle Korrektur, unabhängig von Masse
+                            }
+                            else if (w > 0.0f)
+                            {
+                                w = 1.0f / w;
+                            }
+                            
+                            float correction = dist * effStiffness;
+                            float3 correctionVec = delta * (correction * w);
+                            positions[idx] += correctionVec;
+                            
+                            if (accumulateFeedback)
+                            {
+                                particleTargetFeedbacks[i] -= correctionVec * massMultipliers[idx];
+                            }
+                        }
 
                         // Apply collision constraints
                         if (collisionsEnabled)
@@ -1597,20 +1752,6 @@ namespace RopeToolkit
                                     collisionPlanes[planeIndex] = plane;
                                 }
                             }
-                        }
-
-                        // Apply rigidbody connections
-                        for (int i = 0; i < particleTargets.Length; i++)
-                        {
-                            var target = particleTargets[i];
-                            if (target.particleIndex == -1)
-                            {
-                                continue;
-                            }
-
-                            var delta = (target.position - positions[target.particleIndex]) * target.stiffness;
-                            positions[target.particleIndex] += delta;
-                            particleTargetFeedbacks[i] -= delta * massMultipliers[target.particleIndex];
                         }
                     }
                 }
@@ -1629,26 +1770,50 @@ namespace RopeToolkit
                     delta = 0.0f;
                 }
 
-                var correction = (dist - desiredSpacing) * stiffness;
-
-                var w0 = massMultipliers[idx0];
-                if (w0 > 0.0f)
+                // Bei stiffness=1.0: 100% Korrektur, ignoriere Masse
+                if (stiffness >= 0.999f)
                 {
-                    w0 = 1.0f / w0;
+                    float error = dist - desiredSpacing;
+                    
+                    // Beide Partikel beweglich: je 50%
+                    if (massMultipliers[idx0] > 0.0f && massMultipliers[idx1] > 0.0f)
+                    {
+                        positions[idx0] -= delta * (error * 0.5f);
+                        positions[idx1] += delta * (error * 0.5f);
+                    }
+                    // Nur idx0 beweglich: 100%
+                    else if (massMultipliers[idx0] > 0.0f)
+                    {
+                        positions[idx0] -= delta * error;
+                    }
+                    // Nur idx1 beweglich: 100%
+                    else if (massMultipliers[idx1] > 0.0f)
+                    {
+                        positions[idx1] += delta * error;
+                    }
                 }
-                var w1 = massMultipliers[idx1];
-                if (w1 > 0.0f)
+                else
                 {
-                    w1 = 1.0f / w1;
+                    // Standard: Weiche Korrektur mit Masse
+                    var w0 = massMultipliers[idx0];
+                    if (w0 > 0.0f)
+                    {
+                        w0 = 1.0f / w0;
+                    }
+                    var w1 = massMultipliers[idx1];
+                    if (w1 > 0.0f)
+                    {
+                        w1 = 1.0f / w1;
+                    }
+                    var invSumW = w0 + w1;
+                    if (invSumW > 0.0f)
+                    {
+                        invSumW = 1.0f / invSumW;
+                    }
+                    float correction = (dist - desiredSpacing) * stiffness;
+                    positions[idx0] -= delta * (correction * w0 * invSumW);
+                    positions[idx1] += delta * (correction * w1 * invSumW);
                 }
-                var invSumW = w0 + w1;
-                if (invSumW > 0.0f)
-                {
-                    invSumW = 1.0f / invSumW;
-                }
-
-                positions[idx0] -= delta * (correction * w0 * invSumW);
-                positions[idx1] += delta * (correction * w1 * invSumW);
             }
 
             private void ApplyCollisionConstraint(int idx, ref CollisionPlane plane)

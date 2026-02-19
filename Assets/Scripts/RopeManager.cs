@@ -35,6 +35,8 @@ public class RopeManager : MonoBehaviour
     {
         GameObject anchor = GameObject.Find("/Ropes/TestAnchorChain/Anchor");
         anchorRigidbody = anchor.GetComponent<Rigidbody>();
+
+        
        
     }
 
