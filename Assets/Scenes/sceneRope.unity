@@ -119,37 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &64038021
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 64038022}
-  m_Layer: 0
-  m_Name: Clamp
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &64038022
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 64038021}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.466, y: -0, z: -0.495}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 201962048}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &201962047
 GameObject:
   m_ObjectHideFlags: 0
@@ -186,7 +155,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 356258293}
-  - {fileID: 64038022}
+  - {fileID: 369640633}
   m_Father: {fileID: 3928186617166063613}
   m_LocalEulerAnglesHint: {x: -0.462, y: 90, z: 0}
 --- !u!65 &201962050
@@ -813,6 +782,65 @@ Transform:
   m_Children: []
   m_Father: {fileID: 201962048}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &369640632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 369640633}
+  - component: {fileID: 369640634}
+  m_Layer: 0
+  m_Name: Clamp
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &369640633
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 369640632}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.489, y: 0.51, z: -0.489}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 201962048}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &369640634
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 369640632}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &390590707
 GameObject:
   m_ObjectHideFlags: 0
@@ -2867,8 +2895,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8502228601259783210}
   - component: {fileID: 8502228601259783213}
-  - component: {fileID: 8502228601259783211}
   - component: {fileID: 8502228601259783212}
+  - component: {fileID: 8502228601259783211}
   m_Layer: 0
   m_Name: Rope
   m_TagString: Untagged
@@ -3055,19 +3083,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c7388c73173748148c4ba5f2ad6c713, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RopeToolkit.RopeConnection
-  type: 0
-  ropeLocation: 0
+  type: 3
+  ropeLocation: 1
   autoFindRopeLocation: 0
   rigidbodySettings:
-    body: {fileID: 0}
-    stiffness: 1
-    damping: 0.622
+    body: {fileID: 201962054}
+    stiffness: 0.1
+    damping: 0.1
   transformSettings:
-    transform: {fileID: 3326707631579601543}
+    transform: {fileID: 0}
   localConnectionPoint:
-    x: 0.02
-    y: 0.48
-    z: 0
+    x: 0
+    y: 0.49
+    z: -0.5
 --- !u!114 &8502228601259783212
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3080,19 +3108,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c7388c73173748148c4ba5f2ad6c713, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RopeToolkit.RopeConnection
-  type: 3
-  ropeLocation: 1
+  type: 0
+  ropeLocation: 0
   autoFindRopeLocation: 0
   rigidbodySettings:
-    body: {fileID: 201962054}
-    stiffness: 1
-    damping: 0.921
+    body: {fileID: 0}
+    stiffness: 0.1
+    damping: 0.1
   transformSettings:
-    transform: {fileID: 64038022}
+    transform: {fileID: 3326707631579601543}
   localConnectionPoint:
-    x: 0.43
-    y: 0.52
-    z: -0.53
+    x: 0
+    y: 0
+    z: 0
 --- !u!114 &8502228601259783213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3116,36 +3144,36 @@ MonoBehaviour:
     scale: {x: 1, y: 1, z: 1}
     stretch: 0
   spawnPoints:
-  - x: 9.277143
-    y: 2.7586954
-    z: -0.6986643
-  - x: 6.5862083
-    y: 2.8085
-    z: -0.29745486
-  - x: 3.749637
-    y: 2.8202188
-    z: 0.08103599
+  - x: 3.4188232
+    y: 2.8507364
+    z: 0.16005859
+  - x: 6.503522
+    y: 2.3246133
+    z: 0.09264378
+  - x: 9.255106
+    y: 2.9061563
+    z: 0.09448239
   interpolation: 0
   simulation:
     enabled: 1
     resolution: 10
-    massPerMeter: 0.01
+    massPerMeter: 0.2
     stiffness: 1
-    energyLoss: 0.006
-    lengthMultiplier: 1
+    energyLoss: 0.0025
+    lengthMultiplier: 0.94
     gravityMultiplier: 1
     useCustomGravity: 0
     customGravity:
       x: 0
       y: -9.81
       z: 0
-    substeps: 5
-    solverIterations: 11
+    substeps: 4
+    solverIterations: 2
   collisions:
     enabled: 1
-    influenceRigidbodies: 0
+    influenceRigidbodies: 1
     stride: 1
-    friction: 0
+    friction: 0.1
     collisionMargin: 0.025
     ignoreLayers:
       serializedVersion: 2
