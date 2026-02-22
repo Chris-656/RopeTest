@@ -13,7 +13,7 @@ public class BoatMotor : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (rb != null && startGo != null)
+        if (rb != null && startGo != null && motorForce != 0)
         {
             // Kraft entlang der X-Achse anwenden an der Position von `startGo`
             Vector3 force = startGo.forward * motorForce;

@@ -1,6 +1,6 @@
 {
     "name": "com.waveharmonic.crest",
-    "version": "5.7.2",
+    "version": "5.7.3",
     "displayName": "Crest",
     "description": "An advanced water system for Unity.",
     "unity": "2022.3",

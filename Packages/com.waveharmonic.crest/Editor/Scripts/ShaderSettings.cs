@@ -51,7 +51,7 @@ namespace WaveHarmonic.Crest.Editor
 
         sealed class AssetPostProcessor : AssetPostprocessor
         {
-            const string k_SettingsPath = "Packages/com.waveharmonic.crest/Runtime/Shaders/Library/Settings.Crest.hlsl";
+            const string k_SettingsPath = "Packages/com.waveharmonic.crest/Runtime/Shaders/Library/Settings/";
 
             static async void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] movedTo, string[] movedFrom, bool domainReload)
             {
@@ -61,7 +61,7 @@ namespace WaveHarmonic.Crest.Editor
                 if (EditorApplication.isCompiling)
                 {
 #if CREST_DEBUG
-                    if (imported.Contains(k_SettingsPath))
+                    if (imported.Count(x => x.StartsWithNoAlloc(k_SettingsPath)) > 0)
                     {
                         UnityEngine.Debug.Log($"Crest: Settings.Crest.hlsl changed during compilation!");
                     }
@@ -72,7 +72,7 @@ namespace WaveHarmonic.Crest.Editor
                 if (EditorApplication.isUpdating)
                 {
 #if CREST_DEBUG
-                    if (imported.Contains(k_SettingsPath))
+                    if (imported.Count(x => x.StartsWithNoAlloc(k_SettingsPath)) > 0)
                     {
                         UnityEngine.Debug.Log($"Crest: Settings.Crest.hlsl changed during asset database update!");
                     }
@@ -81,7 +81,7 @@ namespace WaveHarmonic.Crest.Editor
                 }
 
                 // Regenerate if file changed like re-importing.
-                if (imported.Contains(k_SettingsPath))
+                if (imported.Count(x => x.StartsWithNoAlloc(k_SettingsPath)) > 0)
                 {
 #if CREST_DEBUG
                     UnityEngine.Debug.Log($"Crest: Settings.Crest.hlsl changed!");

@@ -251,7 +251,7 @@ namespace WaveHarmonic.Crest
                 CoreUtils.SetRenderTarget(buffer, DataTexture, ClearFlag.Color, ClearColor);
 
                 // Custom clear because clear not working.
-                if (Helpers.IsWebGPU && WaterResources.Instance.Compute._Clear != null)
+                if (Helpers.RequiresCustomClear && WaterResources.Instance.Compute._Clear != null)
                 {
                     var compute = WaterResources.Instance._ComputeLibrary._ClearCompute;
                     var wrapper = new PropertyWrapperCompute(buffer, compute._Shader, compute._KernelClearTarget);

@@ -370,6 +370,8 @@ namespace WaveHarmonic.Crest
             false;
 #endif
 
+        public static bool RequiresCustomClear => IsWebGPU || Application.platform == RuntimePlatform.PS5;
+
         // R16G16B16A16_SFloat appears to be the most compatible format.
         // https://docs.unity3d.com/Manual/class-TextureImporterOverride.html#texture-compression-support-platforms
         // https://learn.microsoft.com/en-us/windows/win32/direct3d12/typed-unordered-access-view-loads#supported-formats-and-api-calls
